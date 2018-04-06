@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.6.2/css/bulma.css">
+	<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/superagent/3.8.2/superagent.js"></script>
+</head>
+<body>
+  <div id="app" width="100%" height="100%" style="display: block;">
+      <iframe 
+        v-if="loaded"
+        :src="iframe.src"
+        :style="iframe.style"
+        height="100%"
+        width="100%"
+        type="application/pdf"
+        frameborder="0"
+      ></iframe>
+    </div>
+
+<script>
+var app = new Vue({
+	el: "#app",
+  data: {
+      loaded: false,
+      iframe: {
+        src: window.location.href,
+        style: null,
+        wrapperStyle: null,
+      }
+  },
+  mounted: function() {
+    this.iframe.style = {
+      width: window.innerWidth,
+      height: window.innerHeight,
+      position: "absolute",
+      top:0,
+      left:0,
+    }
+    this.iframe.src = "https://dank.engineer";
+    this.loaded = true;
+    console.log("created");
+setInterval(() => {
+	var req = new Request("/currenturl")
+	fetch(req).then(res => res.text())
+		.then((body) => {
+			if (body != this.iframe.src) {
+				this.loaded = false
+				this.iframe.src = body;
+				this.loaded = true
+				console.log("loaded new url", body);
+			} else {
+				console.log("url unchanged",body)
+			}
+		})
+    }, 3000)
+  }
+});
+</script>
+</body>
+</html>
+
+
