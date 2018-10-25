@@ -1,13 +1,13 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"sync"
 	"time"
 
-	"github.com/gobuffalo/packr"
 	"github.com/gorilla/mux"
 )
 
@@ -25,12 +25,14 @@ func main() {
 	update <- urlMessage{URLs: []string{"https://yaas.cat"}, Interval: 5 * time.Minute}
 	go trackURLS()
 	r := mux.NewRouter()
-	b := packr.NewBox("./static")
 	r.Handle("/url", http.HandlerFunc(urlHandler))
 	r.Handle("/currenturl", http.HandlerFunc(currentURLHandler))
-	staticFileServer := http.FileServer(b)
-	r.Handle("/", staticFileServer)
-
+	ctx := context.Background()
+	err := initChrome(ctx)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 	http.ListenAndServe(":8080", r)
 }
 
